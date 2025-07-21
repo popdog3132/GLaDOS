@@ -14,7 +14,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# edit .env and set OPENAI_API_KEY and PORT
+# edit .env and set OPENAI_API_KEY, PORT and SERVER_HOST
 ```
 
 ## Running
@@ -26,6 +26,7 @@ Expose the port with ngrok in a separate terminal:
 ```bash
 ngrok http 5050
 ```
-Configure your Twilio number to send webhooks for incoming calls to `https://<ngrok-subdomain>.ngrok.app/incoming-call`.
+Set `SERVER_HOST` in your `.env` to the publicly reachable hostname (for
+example your ngrok subdomain). Configure your Twilio number to send webhooks for incoming calls to `https://<ngrok-subdomain>.ngrok.app/incoming-call`.
 
 Dial the number and chat with the assistant.
