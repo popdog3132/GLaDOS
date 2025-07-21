@@ -3,13 +3,14 @@ import json
 import asyncio
 import base64
 import websockets
-from fastapi import FastAPI, WebSocket, Request
+from fastapi import FastAPI, WebSocket, Request, HTTPException
 from twilio.twiml.voice_response import VoiceResponse, Connect, Stream
 from dotenv import load_dotenv
 
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+SERVER_HOST = os.getenv("SERVER_HOST")
 VOICE = "alloy"
 MODEL_WS = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01"
 
@@ -18,10 +19,14 @@ app = FastAPI()
 @app.api_route("/incoming-call", methods=["GET", "POST"])
 async def incoming(request: Request):
     """Return TwiML directing Twilio to open a media stream."""
+    if SERVER_HOST and request.url.hostname != SERVER_HOST:
+        raise HTTPException(status_code=400, detail="Invalid host")
+
     resp = VoiceResponse()
     resp.say("Connecting you to the AI assistant.")
     connect = Connect()
-    connect.stream(url=f"wss://{request.url.hostname}/media-stream")
+    stream_host = SERVER_HOST or request.url.hostname
+    connect.stream(url=f"wss://{stream_host}/media-stream")
     resp.append(connect)
     return resp.to_xml()
 
